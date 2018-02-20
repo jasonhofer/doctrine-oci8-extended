@@ -1,0 +1,21 @@
+{
+    "name": "develpup/doctrine-oci8-extended",
+    "description": "Doctrine's OCI8 driver with cursor support.",
+    "type": "library",
+    "require": {
+        "doctrine/dbal": "^2.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jason Hofer",
+            "email": "jason.hofer@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Doctrine\\DBAL\\Driver\\OCI8Ext\\": "src/"
+        }
+    }
+}
+
