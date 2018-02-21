@@ -14,7 +14,7 @@ class OCI8Statement extends BaseStatement
 
         if (is_numeric($type)) {
             $type = (int) $type;
-        } elseif (defined($type)) {
+        } elseif (0 === strpos($type, 'OCI_') || 0 === strpos($type, 'SQLT_')) {
             $ociType = constant($type); // Allow "OCI_" and "SQLT_" constants as strings.
         }
 
