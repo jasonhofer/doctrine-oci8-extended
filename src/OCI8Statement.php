@@ -8,6 +8,7 @@ class OCI8Statement extends BaseStatement
 {
     public function bindParam($column, &$variable, $type = \PDO::PARAM_STR, $length = null)
     {
+        $origCol = $column;
         $column  = isset($this->_paramMap[$column]) ? $this->_paramMap[$column] : $column;
         $ociType = null;
 
@@ -51,7 +52,7 @@ class OCI8Statement extends BaseStatement
             return oci_bind_by_name($this->_sth, $column, $variable, null === $length ? -1 :  $length, $ociType);
         }
 
-        return parent::bindParam($column, $variable, $type, $length);
+        return parent::bindParam($origCol, $variable, $type, $length);
     }
 }
 
