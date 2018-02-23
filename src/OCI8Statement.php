@@ -267,13 +267,13 @@ class OCI8Statement extends BaseStatement
         $shared = [];
         foreach ($row as $field => $value) {
             if (is_resource($value)) {
+                $this->hasCursorFields = true;
+                $this->cursorFields[]  = $field;
                 $key = (string) $value;
                 if (isset($shared[$key])) {
                     $row[$field] = $shared[$key];
                     continue;
                 }
-                $this->hasCursorFields = true;
-                $this->cursorFields[]  = $field;
                 // We are already here, so might as well process it.
                 $row[$field]  =  $this->fetchCursorValue($row[$field], $fetchMode, $returnCursors);
                 $shared[$key] =& $row[$field];
