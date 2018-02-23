@@ -31,4 +31,14 @@ class OCI8Connection extends BaseConnection
     {
         return new OCI8Statement($this->dbh, $prepareString, $this);
     }
+
+    /**
+     * @param resource $sth
+     *
+     * @return OCI8Cursor
+     */
+    public function newCursor($sth = null)
+    {
+        return new OCI8Cursor($this->dbh, $this, $sth);
+    }
 }

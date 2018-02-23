@@ -27,13 +27,14 @@ class OCI8Cursor extends OCI8Statement
     /**
      * @param resource   $dbh
      * @param Connection $conn
+     * @param resource   $sth
      *
      * @override
      */
-    public function __construct($dbh, Connection $conn)
+    public function __construct($dbh, Connection $conn, $sth = null)
     {
         $this->_dbh  = $dbh;
         $this->_conn = $conn;
-        $this->_sth  = oci_new_cursor($dbh);
+        $this->_sth  = $sth ?: oci_new_cursor($dbh);
     }
 }
