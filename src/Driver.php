@@ -33,7 +33,7 @@ class Driver extends BaseDriver
      *
      * @return OCI8Connection
      *
-     * @throws DBALException
+     * @throws \Exception
      */
     public function connect(array $params, $username = null, $password = null, array $driverOptions = array())
     {
@@ -46,9 +46,12 @@ class Driver extends BaseDriver
                 isset($params['sessionMode']) ? $params['sessionMode'] : OCI_DEFAULT,
                 isset($params['persistent']) ? $params['persistent'] : false
             );
-        } catch (OCI8Exception $e) {
+        } catch (\Exception $e) {
+            if ($e instanceof OCI8Exception) {
+                throw DBALException::driverException($this, $e);
+            }
             /** @noinspection PhpUnhandledExceptionInspection */
-            throw DBALException::driverException($this, $e);
+            throw $e;
         }
     }
 }

@@ -11,7 +11,6 @@
 
 namespace Doctrine\DBAL\Driver\OCI8Ext;
 
-use Doctrine\DBAL\Driver\OCI8\OCI8Exception;
 use Doctrine\DBAL\Driver\OCI8\OCI8Statement as BaseStatement;
 
 /**
@@ -24,12 +23,6 @@ use Doctrine\DBAL\Driver\OCI8\OCI8Statement as BaseStatement;
 class OCI8Statement extends BaseStatement
 {
     /**
-     * @noinspection ClassOverridesFieldOfSuperClassInspection
-     * @var OCI8Connection
-     */
-    protected $_conn;
-
-    /**
      * Holds references to bound parameter values.
      *
      * This is a new requirement for PHP7's oci8 extension that prevents bound values from being garbage collected.
@@ -38,10 +31,10 @@ class OCI8Statement extends BaseStatement
      *
      * @var array
      */
-    private $references = [];
+    private $references = array();
 
     /** @var array */
-    protected $cursorFields = [];
+    protected $cursorFields = array();
     /** @var bool */
     protected $checkedForCursorFields = false;
     /** @var bool */
@@ -91,7 +84,9 @@ class OCI8Statement extends BaseStatement
 
         // Type: Cursor.
         if (\PDO::PARAM_STMT === $type || OCI_B_CURSOR === $ociType) {
-            $variable = $this->_conn->newCursor();
+            /** @var OCI8Connection $conn Because my IDE complains. */
+            $conn     = $this->_conn;
+            $variable = $conn->newCursor();
 
             $this->references[$column] =& $variable;
 
@@ -161,7 +156,7 @@ class OCI8Statement extends BaseStatement
             $ociType = OCI_B_CURSOR;
         }
 
-        return [$type, $ociType];
+        return array($type, $ociType);
     }
 
     /**
@@ -235,7 +230,7 @@ class OCI8Statement extends BaseStatement
             // This will also call fetchCursorField() on each cursor field of the first row.
             $this->findCursorFields($row, $fetchMode, $returnCursors);
         } elseif ($this->hasCursorFields) {
-            $shared = [];
+            $shared = array();
             foreach ($this->cursorFields as $field) {
                 $key = (string) $row[$field];
                 if (isset($shared[$key])) {
@@ -250,7 +245,7 @@ class OCI8Statement extends BaseStatement
 
     protected function resetCursorFields()
     {
-        $this->cursorFields           = [];
+        $this->cursorFields           = array();
         $this->checkedForCursorFields =
         $this->hasCursorFields        = false;
     }
@@ -264,7 +259,7 @@ class OCI8Statement extends BaseStatement
      */
     protected function findCursorFields(array &$row, $fetchMode, $returnCursors)
     {
-        $shared = [];
+        $shared = array();
         foreach ($row as $field => $value) {
             if (is_resource($value)) {
                 $this->hasCursorFields = true;
@@ -293,7 +288,9 @@ class OCI8Statement extends BaseStatement
      */
     protected function fetchCursorValue($resource, $fetchMode, $returnCursor)
     {
-        $cursor = $this->_conn->newCursor($resource);
+        /** @var OCI8Connection $conn Because my IDE complains. */
+        $conn   = $this->_conn;
+        $cursor = $conn->newCursor($resource);
 
         if ($returnCursor) {
             return $cursor;
@@ -319,6 +316,6 @@ class OCI8Statement extends BaseStatement
         $fetchMode       &= ~(OCI8::RETURN_RESOURCES+OCI8::RETURN_CURSORS); // Must unset the flags or there will be an error.
         $fetchMode        = $fetchMode ?: $this->_defaultFetchMode;
 
-        return [$fetchMode, $returnResources, $returnCursors];
+        return array($fetchMode, $returnResources, $returnCursors);
     }
 }
