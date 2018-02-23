@@ -77,6 +77,7 @@ class OCI8Statement extends BaseStatement
     public function bindParam($column, &$variable, $type = \PDO::PARAM_STR, $length = null)
     {
         $origCol = $column;
+
         /** @noinspection CallableParameterUseCaseInTypeContextInspection */
         $column = isset($this->_paramMap[$column]) ? $this->_paramMap[$column] : $column;
 
@@ -88,16 +89,12 @@ class OCI8Statement extends BaseStatement
             $conn     = $this->_conn;
             $variable = $conn->newCursor();
 
-            $this->references[$column] =& $variable;
-
-            return oci_bind_by_name($this->_sth, $column, $variable->_sth, -1, OCI_B_CURSOR);
+            return $this->bindByName($column, $variable->_sth, -1, OCI_B_CURSOR);
         }
 
-        // Type: Null.
+        // Type: Null. (Must come *after* types that can expect $variable to be null, like 'cursor'.)
         if (null === $variable) {
-            $this->references[$column] =& $variable;
-
-            return oci_bind_by_name($this->_sth, $column, $variable);
+            return $this->bindByName($column, $variable);
         }
 
         // Type: Array.
@@ -107,11 +104,8 @@ class OCI8Statement extends BaseStatement
             if (!$ociType) {
                 $ociType = \PDO::PARAM_INT === $type ? SQLT_INT : SQLT_STR;
             }
-            
-            $this->references[$column] =& $variable;
 
-            return oci_bind_array_by_name(
-                $this->_sth,
+            return $this->bindArrayByName(
                 $column,
                 $variable,
                 max(count($variable), 1),
@@ -124,17 +118,45 @@ class OCI8Statement extends BaseStatement
         if (OCI_B_CLOB === $ociType || OCI_B_BLOB === $ociType) {
             $type = \PDO::PARAM_LOB;
         } elseif ($ociType) {
-            $this->references[$column] =& $variable;
-
-            return oci_bind_by_name(
-                $this->_sth, $column,
-                $variable,
-                null === $length ? -1 : $length,
-                $ociType
-            );
+            return $this->bindByName($column, $variable, null === $length ? -1 : $length, $ociType);
         }
 
         return parent::bindParam($origCol, $variable, $type, $length);
+    }
+
+    /** @noinspection MoreThanThreeArgumentsInspection */
+    /**
+     * @param string $column
+     * @param mixed  $variable
+     * @param int    $maxLength
+     * @param int    $type
+     *
+     * @return bool
+     */
+    protected function bindByName($column, &$variable, $maxLength = -1, $type = SQLT_CHR)
+    {
+        // For PHP 7's OCI8 extension (prevents garbage collection).
+        $this->references[$column] =& $variable;
+
+        return oci_bind_by_name($this->_sth, $column, $variable, $maxLength, $type);
+    }
+
+    /** @noinspection MoreThanThreeArgumentsInspection */
+    /**
+     * @param string $column
+     * @param mixed  $variable
+     * @param int    $maxTableLength
+     * @param int    $maxItemLength
+     * @param int    $type
+     *
+     * @return bool
+     */
+    protected function bindArrayByName($column, &$variable, $maxTableLength, $maxItemLength = -1, $type = SQLT_AFC)
+    {
+        // For PHP 7's OCI8 extension (prevents garbage collection).
+        $this->references[$column] =& $variable;
+
+        return oci_bind_array_by_name($this->_sth, $column, $variable, $maxTableLength, $maxItemLength, $type);
     }
 
     /**
