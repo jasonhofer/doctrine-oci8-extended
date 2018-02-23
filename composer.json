@@ -1,24 +1,38 @@
 {
     "name": "develpup/doctrine-oci8-extended",
     "description": "Doctrine's OCI8 driver with cursor support.",
-    "type": "library",
-    "require": {
-        "php": ">=5.3.2",
-        "doctrine/dbal": "^2.3"
-    },
+    "keywords": ["doctrine", "oci8", "oci", "oracle", "database", "cursor"],
+    "homepage": "https://github.com/jasonhofer/doctrine-oci8-extended",
     "license": "MIT",
+    "type": "library",
     "authors": [
         {
             "name": "Jason Hofer",
             "email": "jason.hofer@gmail.com"
         }
     ],
+    "require": {
+        "php": ">=5.3.2",
+        "ext-oci8": ">=2.0.0",
+        "doctrine/dbal": "^2.3"
+    },
+    "require-dev": {
+        "symfony/debug": "^3.4",
+        "phpunit/phpunit": "^4.8",
+        "vlucas/phpdotenv": "^2.2"
+    },
     "autoload": {
         "psr-4": {
             "Doctrine\\DBAL\\Driver\\OCI8Ext\\": "src/"
         }
     },
-    "require-dev": {
-        "symfony/debug": "^3.4"
+    "autoload-dev": {
+        "psr-4": {
+            "Doctrine\\DBAL\\Driver\\OCI8Ext\\Test\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --colors=always",
+        "test-coverage": "vendor/bin/phpunit --coverage-clover build/logs/clover.xml"
     }
 }
