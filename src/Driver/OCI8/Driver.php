@@ -14,6 +14,7 @@ namespace Doctrine\DBAL\Driver\OCI8Ext;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\OCI8\Driver as BaseDriver;
 use Doctrine\DBAL\Driver\OCI8\OCI8Exception;
+use Doctrine\DBAL\Types\Type;
 
 /**
  * Class Driver
@@ -24,6 +25,18 @@ use Doctrine\DBAL\Driver\OCI8\OCI8Exception;
  */
 class Driver extends BaseDriver
 {
+    /**
+     * Driver constructor.
+     *
+     * @throws DBALException
+     */
+    public function __construct()
+    {
+        if (!Type::hasType('cursor')) {
+            Type::addType('cursor', 'Doctrine\DBAL\Types\CursorType');
+        }
+    }
+
     /** @noinspection MoreThanThreeArgumentsInspection */
     /**
      * @param array  $params

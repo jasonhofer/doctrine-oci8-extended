@@ -23,12 +23,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Doctrine\\DBAL\\Driver\\OCI8Ext\\": "src/"
+            "Doctrine\\DBAL\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Doctrine\\DBAL\\Driver\\OCI8Ext\\Test\\": "tests/"
+            "Doctrine\\DBAL\\Test\\": "tests/"
         }
     },
     "scripts": {

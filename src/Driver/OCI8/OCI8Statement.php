@@ -171,8 +171,9 @@ class OCI8Statement extends BaseStatement
         // Figure out the type.
         if (is_numeric($type)) {
             $type = (int) $type;
-        } elseif (0 === strpos($type, 'OCI_') || 0 === strpos($type, 'SQLT_')) {
-            $ociType = constant($type); // Allow "OCI_" and "SQLT_" constants as strings.
+            if (OCI8::isParamConstant($type)) {
+                $ociType = OCI8::decodeParamConstant($type);
+            }
         } elseif ('cursor' === strtolower($type)) {
             $type    = \PDO::PARAM_STMT;
             $ociType = OCI_B_CURSOR;
