@@ -73,4 +73,93 @@ class OCI8StatementTest extends AbstractTestCase
         $this->assertInstanceOf('Doctrine\DBAL\Driver\OCI8Ext\OCI8Cursor', $cursor2);
         $this->assertInstanceOf('Doctrine\DBAL\Driver\OCI8Ext\OCI8Cursor', $cursor3);
     }
+
+    public function testCursor()
+    {
+        $this->oci()->drop('procedure', 'FIRST_NAMES');
+        $this->oci()->drop('table', 'employees');
+
+        $expected = array(
+            array('FIRST_NAME' => 'John'),
+            array('FIRST_NAME' => 'Jane'),
+            array('FIRST_NAME' => 'George'),
+            array('FIRST_NAME' => 'Albert'),
+        );
+
+        $this->oci()->execute('CREATE TABLE employees ( first_name VARCHAR(20) )');
+
+        foreach ($expected as $emp) {
+            $this->oci()->execute(sprintf('INSERT INTO employees (first_name) VALUES (\'%s\')', $emp['FIRST_NAME']));
+        }
+        $this->oci()->execute('
+            CREATE OR REPLACE PROCEDURE FIRST_NAMES(my_rc OUT sys_refcursor) AS
+            BEGIN
+                OPEN my_rc FOR SELECT first_name FROM employees;
+            END;
+        ');
+        $this->oci()->close();
+
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('BEGIN FIRST_NAMES(:cursor); END;');
+
+        /** @var $cursor \Doctrine\DBAL\Driver\OCI8Ext\OCI8Cursor */
+        $stmt->bindParam('cursor', $cursor, 'cursor');
+        $stmt->execute();
+        $cursor->execute();
+
+        $results = $cursor->fetchAll(\PDO::FETCH_ASSOC);
+
+        $this->assertSame($expected, $results);
+
+        $this->oci()->drop('procedure', 'FIRST_NAMES');
+        $this->oci()->drop('table', 'employees');
+    }
+
+    public function testBindArrayByName()
+    {
+        $this->oci()->drop('package', 'ARRAY_BIND_PKG_1');
+        $this->oci()->drop('table', 'bind_example');
+
+        $this->oci()->execute('CREATE TABLE bind_example ( name VARCHAR(20) )');
+        $this->oci()->execute('
+            CREATE OR REPLACE PACKAGE ARRAY_BIND_PKG_1 AS
+                TYPE ARR_TYPE IS TABLE OF VARCHAR(20) INDEX BY BINARY_INTEGER;
+                PROCEDURE IO_BIND(c1 IN OUT ARR_TYPE);
+            END ARRAY_BIND_PKG_1;'
+        );
+        $this->oci()->execute('
+            CREATE OR REPLACE PACKAGE BODY ARRAY_BIND_PKG_1 AS
+                CURSOR CUR IS SELECT name FROM bind_example;
+                PROCEDURE IO_BIND(c1 IN OUT ARR_TYPE) IS
+                    BEGIN
+                    -- Bulk Insert
+                    FORALL i IN INDICES OF c1
+                        INSERT INTO bind_example VALUES (c1(i));
+                    -- Fetch and reverse
+                    IF NOT CUR%ISOPEN THEN
+                        OPEN CUR;
+                    END IF;
+                    FOR i IN REVERSE 1..5 LOOP
+                        FETCH CUR INTO c1(i);
+                        IF CUR%NOTFOUND THEN
+                            CLOSE CUR;
+                            EXIT;
+                        END IF;
+                    END LOOP;
+                END IO_BIND;
+            END ARRAY_BIND_PKG_1;'
+        );
+        $this->oci()->close();
+
+        $conn  = $this->getConnection();
+        $stmt  = $conn->prepare('BEGIN ARRAY_BIND_PKG_1.IO_BIND(:c1); END;');
+        $array = array('one', 'two', 'three', 'four', 'five');
+        $stmt->bindParam('c1', $array);
+        $stmt->execute();
+
+        $this->assertSame(array('five', 'four', 'three', 'two', 'one'), $array);
+
+        $this->oci()->drop('package', 'ARRAY_BIND_PKG_1');
+        $this->oci()->drop('table', 'bind_example');
+    }
 }

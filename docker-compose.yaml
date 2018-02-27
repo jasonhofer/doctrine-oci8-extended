@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+    oracle_xe:
+        image: wnameless/oracle-xe-11g
+        environment:
+            ORACLE_HOME: /u01/app/oracle/product/11.2.0/xe
+            ORACLE_SID: xe
+            TNS_ADMIN: $ORACLE_HOME/network/admin
+            SQLPLUS: $ORACLE_HOME/bin/sqlplus
+            ORACLE_DISABLE_ASYNCH_IO: 1
+        ports:
+            - '49160:22'
+            - '49161:1521'

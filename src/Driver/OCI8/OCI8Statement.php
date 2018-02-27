@@ -102,7 +102,7 @@ class OCI8Statement extends BaseStatement
             $length = null === $length ? -1 : $length;
 
             if (!$ociType) {
-                $ociType = \PDO::PARAM_INT === $type ? SQLT_INT : SQLT_STR;
+                $ociType = \PDO::PARAM_INT === $type ? SQLT_INT : SQLT_CHR;
             }
 
             return $this->bindArrayByName(
