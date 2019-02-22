@@ -11,6 +11,8 @@
 
 namespace Doctrine\DBAL\Driver\OCI8Ext;
 
+use function oci_new_cursor;
+
 /**
  * Class OCI8Cursor
  *

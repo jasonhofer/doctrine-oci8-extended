@@ -13,6 +13,8 @@
 namespace Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use LogicException;
+use PDO;
 
 /**
  * Class CursorType
@@ -29,11 +31,11 @@ class CursorType extends Type
      * @param array                                     $fieldDeclaration The field declaration.
      * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform         The currently used database platform.
      *
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        throw new \LogicException('Doctrine does not support SQL declarations for cursors.');
+        throw new LogicException('Doctrine does not support SQL declarations for cursors.');
     }
 
     /**
@@ -41,7 +43,7 @@ class CursorType extends Type
      *
      * @return string
      */
-    public function getName()
+    public function getName() : string
     {
         return 'cursor';
     }
@@ -49,8 +51,8 @@ class CursorType extends Type
     /**
      * @return int
      */
-    public function getBindingType()
+    public function getBindingType() : int
     {
-        return \PDO::PARAM_STMT;
+        return PDO::PARAM_STMT;
     }
 }

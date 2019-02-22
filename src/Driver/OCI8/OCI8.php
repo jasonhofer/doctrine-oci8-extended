@@ -23,41 +23,41 @@ const PARAM_MAX    = 0xAFFF;
  */
 final class OCI8
 {
-    const RETURN_RESOURCES = 0x0100;
-    const RETURN_CURSORS   = 0x0200;
+    public const RETURN_RESOURCES = 0x0100;
+    public const RETURN_CURSORS   = 0x0200;
 
     // OCI8::PARAM_* constants are prefixed with binary 1010 (0xA) in the -4th nibble.
-    const PARAM_CHR     = 0xA001;
-    const PARAM_NUM     = 0xA002;
-    const PARAM_INT     = 0xA003;
-    const PARAM_FLT     = 0xA004;
-    const PARAM_STR     = 0xA005;
-    const PARAM_LNG     = 0xA008;
-    const PARAM_VCS     = 0xA009;
-    const PARAM_BFLOAT  = 0xA015;
-    const PARAM_BDOUBLE = 0xA016;
-    const PARAM_BIN     = 0xA017;
-    const PARAM_LBI     = 0xA018;
-    const PARAM_UIN     = 0xA044;
-    const PARAM_LVC     = 0xA05E;
-    const PARAM_AFC     = 0xA060;
-    const PARAM_AVC     = 0xA061;
-    const PARAM_ROWID   = 0xA068;
-    const PARAM_NTY     = 0xA06C;
-    const PARAM_CLOB    = 0xA070;
-    const PARAM_BLOB    = 0xA071;
-    const PARAM_BFILEE  = 0xA072;
-    const PARAM_CFILEE  = 0xA073;
-    const PARAM_CURSOR  = 0xA074;
-    const PARAM_ODT     = 0xA09C;
-    const PARAM_BOOL    = 0xA0FC;
+    public const PARAM_CHR     = 0xA001;
+    public const PARAM_NUM     = 0xA002;
+    public const PARAM_INT     = 0xA003;
+    public const PARAM_FLT     = 0xA004;
+    public const PARAM_STR     = 0xA005;
+    public const PARAM_LNG     = 0xA008;
+    public const PARAM_VCS     = 0xA009;
+    public const PARAM_BFLOAT  = 0xA015;
+    public const PARAM_BDOUBLE = 0xA016;
+    public const PARAM_BIN     = 0xA017;
+    public const PARAM_LBI     = 0xA018;
+    public const PARAM_UIN     = 0xA044;
+    public const PARAM_LVC     = 0xA05E;
+    public const PARAM_AFC     = 0xA060;
+    public const PARAM_AVC     = 0xA061;
+    public const PARAM_ROWID   = 0xA068;
+    public const PARAM_NTY     = 0xA06C;
+    public const PARAM_CLOB    = 0xA070;
+    public const PARAM_BLOB    = 0xA071;
+    public const PARAM_BFILEE  = 0xA072;
+    public const PARAM_CFILEE  = 0xA073;
+    public const PARAM_CURSOR  = 0xA074;
+    public const PARAM_ODT     = 0xA09C;
+    public const PARAM_BOOL    = 0xA0FC;
 
     /**
      * @param int $value
      *
      * @return bool
      */
-    public static function isParamConstant($value)
+    public static function isParamConstant($value) : bool
     {
         return $value >= PARAM_PREFIX && $value <= PARAM_MAX;
     }
@@ -67,7 +67,7 @@ final class OCI8
      *
      * @return int
      */
-    public static function decodeParamConstant($value)
+    public static function decodeParamConstant($value) : int
     {
         return self::isParamConstant($value) ? ($value & ~PARAM_PREFIX) : $value;
     }

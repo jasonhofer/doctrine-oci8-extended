@@ -15,6 +15,9 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\OCI8\Driver as BaseDriver;
 use Doctrine\DBAL\Driver\OCI8\OCI8Exception;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\CursorType;
+use Exception;
+use const OCI_DEFAULT;
 
 /**
  * Class Driver
@@ -33,7 +36,7 @@ class Driver extends BaseDriver
     public function __construct()
     {
         if (!Type::hasType('cursor')) {
-            Type::addType('cursor', 'Doctrine\DBAL\Types\CursorType');
+            Type::addType('cursor', CursorType::class);
         }
     }
 
@@ -46,20 +49,20 @@ class Driver extends BaseDriver
      *
      * @return OCI8Connection
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function connect(array $params, $username = null, $password = null, array $driverOptions = array())
+    public function connect(array $params, $username = null, $password = null, array $driverOptions = array()) : OCI8Connection
     {
         try {
             return new OCI8Connection(
                 $username,
                 $password,
                 $this->_constructDsn($params),
-                isset($params['charset']) ? $params['charset'] : null,
-                isset($params['sessionMode']) ? $params['sessionMode'] : OCI_DEFAULT,
-                isset($params['persistent']) ? $params['persistent'] : false
+                $params['charset'] ?? null,
+                $params['sessionMode'] ?? OCI_DEFAULT,
+                $params['persistent'] ?? false
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($e instanceof OCI8Exception) {
                 throw DBALException::driverException($this, $e);
             }

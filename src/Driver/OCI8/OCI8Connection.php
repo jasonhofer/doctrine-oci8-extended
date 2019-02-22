@@ -27,7 +27,7 @@ class OCI8Connection extends BaseConnection
      *
      * @return OCI8Statement
      */
-    public function prepare($prepareString)
+    public function prepare($prepareString) : OCI8Statement
     {
         return new OCI8Statement($this->dbh, $prepareString, $this);
     }
@@ -37,7 +37,7 @@ class OCI8Connection extends BaseConnection
      *
      * @return OCI8Cursor
      */
-    public function newCursor($sth = null)
+    public function newCursor($sth = null) : OCI8Cursor
     {
         return new OCI8Cursor($this->dbh, $this, $sth);
     }

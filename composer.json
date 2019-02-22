@@ -12,13 +12,13 @@
         }
     ],
     "require": {
-        "php": ">=5.3.2",
-        "ext-oci8": ">=2.0.0",
-        "doctrine/dbal": ">=2.3,<2.8-dev"
+        "php": "^7.1",
+        "ext-oci8": ">=2.1.2",
+        "doctrine/dbal": "^2.6"
     },
     "require-dev": {
-        "symfony/debug": "^3.4",
-        "symfony/dotenv": "^3.4",
+        "symfony/debug": "^3.4||^4.0",
+        "symfony/dotenv": "^3.4||^4.0",
         "phpunit/phpunit": "4.*"
     },
     "autoload": {
