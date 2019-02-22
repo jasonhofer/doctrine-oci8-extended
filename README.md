@@ -50,7 +50,7 @@ a statement.
 Sub-Cursors
 -----------
 Cursor resources returned in a column of a result set are automatically fetched.
-You can change this behavior by passing in one these *fetch mode* flags:
+You can change this behavior by passing in one of these *fetch mode* flags:
 
 - `OCI8::RETURN_RESOURCES` to return the raw PHP resources.
 - `OCI8::RETURN_CURSORS` to return the `OCI8Cursor` objects that have not
