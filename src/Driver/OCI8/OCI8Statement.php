@@ -260,6 +260,43 @@ class OCI8Statement extends BaseStatement
     }
 
     /**
+     * Returns a single column from the next row of a result set or FALSE if there are no more rows.
+     *
+     * Cursors will be fetched, unless otherwise specified by the fetch mode.
+     *
+     * @param int $columnIndex    0-indexed number of the column you wish to retrieve from the row.
+     *                            If no value is supplied, PDOStatement->fetchColumn()
+     *                            fetches the first column.
+     * @param int|null $fetchMode Controls how the next column value will be returned to the caller, if it is
+     *                            a cursor. The value must be one of the PDO::FETCH_* and/or OCI8::RETURN_* constants,
+     *                            defaulting to PDO::FETCH_BOTH.
+     *
+     * @return string|bool|array|resource|OCI8Cursor A single column in the next row of a result set, or FALSE if
+     *                                               there are no more rows.
+     *
+     * @see PDO::FETCH_* and OCI8::RETURN_* constants.
+     *
+     * @throws \Doctrine\DBAL\Driver\OCI8\OCI8Exception
+     */
+    public function fetchColumn($columnIndex = 0, $fetchMode = null)
+    {
+        list(
+            $fetchMode,
+            $returnResources,
+            $returnCursors
+        ) = $this->processFetchMode($fetchMode, true);
+
+        /** @var array|bool|null|string|resource $columnValue */
+        $columnValue = parent::fetchColumn($columnIndex);
+
+        if (!$returnResources && is_resource($columnValue)) {
+            return $this->fetchCursorValue($columnValue, $fetchMode, $returnCursors);
+        }
+
+        return $columnValue;
+    }
+
+    /**
      * @param array|mixed $row
      * @param int         $fetchMode
      * @param bool        $returnCursors
