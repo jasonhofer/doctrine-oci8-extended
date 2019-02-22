@@ -40,9 +40,18 @@ class OCI8Statement extends BaseStatement
     /** @var bool */
     protected $hasCursorFields = false;
 
-    /** @var bool */
+    /**
+     * Used because parent::fetchAll() calls $this->fetch().
+     *
+     * @var bool
+     */
     private $returningResources = false;
-    /** @var bool */
+
+    /**
+     * Used because parent::fetchAll() calls $this->fetch().
+     *
+     * @var bool
+     */
     private $returningCursors = false;
 
     /**
@@ -205,6 +214,7 @@ class OCI8Statement extends BaseStatement
             $returnResources,
             $returnCursors
         ) = $this->processFetchMode($fetchMode, true);
+        // "Globals" are checked because parent::fetchAll() uses $this->fetch().
 
         $row = parent::fetch($fetchMode);
 
@@ -237,19 +247,27 @@ class OCI8Statement extends BaseStatement
             $this->returningResources,
             $this->returningCursors
         ) = $this->processFetchMode($fetchMode);
+        // "Globals" are set because parent::fetchAll() uses $this->fetch().
 
         $results = parent::fetchAll($fetchMode);
 
         if (
             !$this->returningResources &&
+            $results &&
             is_array($results) &&
-            $fetchMode !== \PDO::FETCH_COLUMN &&
-            self::$fetchModeMap[$fetchMode] !== OCI_BOTH // handled in parent::fetchAll()
+            self::$fetchModeMap[$fetchMode] !== OCI_BOTH // handled by $this->fetch() in parent::fetchAll().
         ) {
-            foreach ($results as &$row) {
-                $this->fetchCursorFields($row, $fetchMode, $this->returningCursors);
+            if (\PDO::FETCH_COLUMN !== $fetchMode) {
+                foreach ($results as &$row) {
+                    $this->fetchCursorFields($row, $fetchMode, $this->returningCursors);
+                }
+                unset($row);
+            } elseif (is_resource(reset($results))) {
+                $self    = $this;
+                $results = array_map(function ($value) use ($self, $fetchMode) {
+                    return $self->fetchCursorValue($value, $fetchMode, $self->returningCursors);
+                }, $results);
             }
-            unset($row);
         }
 
         $this->returningResources =
@@ -284,7 +302,7 @@ class OCI8Statement extends BaseStatement
             $fetchMode,
             $returnResources,
             $returnCursors
-        ) = $this->processFetchMode($fetchMode, true);
+        ) = $this->processFetchMode($fetchMode);
 
         /** @var array|bool|null|string|resource $columnValue */
         $columnValue = parent::fetchColumn($columnIndex);
