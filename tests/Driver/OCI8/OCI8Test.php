@@ -9,7 +9,6 @@
  * file that was distributed with this source code.
  */
 
-
 namespace Doctrine\DBAL\Test\Driver\OCI8Ext;
 
 use Doctrine\DBAL\Driver\OCI8Ext\OCI8;
@@ -39,7 +38,7 @@ class OCI8Test extends AbstractTestCase
         $this->assertSame(OCI_B_CURSOR, OCI8::decodeParamConstant(OCI8::PARAM_CURSOR));
     }
 
-    public function testDecodeParamConstantReturnsValueIfNotParamConstant()
+    public function testDecodeParamConstantReturnsGivenValueIfNotParamConstant()
     {
         $this->assertSame(0, OCI8::decodeParamConstant(0));
         $this->assertSame(1, OCI8::decodeParamConstant(1));

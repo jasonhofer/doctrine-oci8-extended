@@ -26,7 +26,7 @@ final class OCI8
     const RETURN_RESOURCES = 0x0100;
     const RETURN_CURSORS   = 0x0200;
 
-    // PARAM constants are prefixed with binary 1010 in the -4th nibble.
+    // OCI8::PARAM_* constants are prefixed with binary 1010 (0xA) in the -4th nibble.
     const PARAM_CHR     = 0xA001;
     const PARAM_NUM     = 0xA002;
     const PARAM_INT     = 0xA003;

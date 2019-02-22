@@ -183,15 +183,28 @@ class OCI8Statement extends BaseStatement
     }
 
     /**
-     * @param int $fetchMode
+     * Returns the next row of a result set.
      *
-     * @return array|bool|mixed
+     * Cursors will be fetched, unless otherwise specified by the fetch mode.
+     *
+     * @param int|null $fetchMode Controls how the next row will be returned to the caller.
+     *                            The value must be one of the PDO::FETCH_* and/or OCI8::RETURN_* constants,
+     *                            defaulting to PDO::FETCH_BOTH.
+     *
+     * @return array|bool|mixed The return value of this method on success depends on the fetch mode.
+     *                          In all cases, FALSE is returned on failure.
+     *
+     * @see PDO::FETCH_* and OCI8::RETURN_* constants.
      *
      * @throws \Doctrine\DBAL\Driver\OCI8\OCI8Exception
      */
     public function fetch($fetchMode = null)
     {
-        list($fetchMode, $returnResources, $returnCursors) = $this->processFetchMode($fetchMode, true);
+        list(
+            $fetchMode,
+            $returnResources,
+            $returnCursors
+        ) = $this->processFetchMode($fetchMode, true);
 
         $row = parent::fetch($fetchMode);
 
@@ -203,9 +216,17 @@ class OCI8Statement extends BaseStatement
     }
 
     /**
-     * @param int $fetchMode
+     * Returns an array containing all of the result set rows.
+     *
+     * Cursors will be fetched, unless otherwise specified by the fetch mode.
+     *
+     * @param int|null $fetchMode Controls how the next row will be returned to the caller.
+     *                            The value must be one of the PDO::FETCH_* and/or OCI8::RETURN_* constants,
+     *                            defaulting to PDO::FETCH_BOTH.
      *
      * @return array|mixed
+     *
+     * @see PDO::FETCH_* and OCI8::RETURN_* constants.
      *
      * @throws \Doctrine\DBAL\Driver\OCI8\OCI8Exception
      */
@@ -284,18 +305,19 @@ class OCI8Statement extends BaseStatement
     {
         $shared = array();
         foreach ($row as $field => $value) {
-            if (is_resource($value)) {
-                $this->hasCursorFields = true;
-                $this->cursorFields[]  = $field;
-                $key = (string) $value;
-                if (isset($shared[$key])) {
-                    $row[$field] = $shared[$key];
-                    continue;
-                }
-                // We are already here, so might as well process it.
-                $row[$field]  =  $this->fetchCursorValue($row[$field], $fetchMode, $returnCursors);
-                $shared[$key] =& $row[$field];
+            if (!is_resource($value)) {
+                continue;
             }
+            $this->hasCursorFields = true;
+            $this->cursorFields[]  = $field;
+            $key = (string) $value;
+            if (isset($shared[$key])) {
+                $row[$field] = $shared[$key];
+                continue;
+            }
+            // We are already here, so might as well process it.
+            $row[$field]  =  $this->fetchCursorValue($row[$field], $fetchMode, $returnCursors);
+            $shared[$key] =& $row[$field];
         }
         $this->checkedForCursorFields = true;
     }
@@ -337,7 +359,7 @@ class OCI8Statement extends BaseStatement
         $returnResources  = ($checkGlobal && $this->returningResources) || ($fetchMode & OCI8::RETURN_RESOURCES);
         $returnCursors    = ($checkGlobal && $this->returningCursors)   || ($fetchMode & OCI8::RETURN_CURSORS);
         $fetchMode       &= ~(OCI8::RETURN_RESOURCES+OCI8::RETURN_CURSORS); // Must unset the flags or there will be an error.
-        $fetchMode        = $fetchMode ?: $this->_defaultFetchMode;
+        $fetchMode        = (int) ($fetchMode ?: $this->_defaultFetchMode);
 
         return array($fetchMode, $returnResources, $returnCursors);
     }

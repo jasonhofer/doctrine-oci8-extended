@@ -9,6 +9,7 @@
  * file that was distributed with this source code.
  */
 
+/* @noinspection PhpUnhandledExceptionInspection */
 
 namespace Doctrine\DBAL\Test\Driver\OCI8Ext;
 
@@ -34,7 +35,9 @@ class OCI8ConnectionTest extends AbstractTestCase
 
     public function testNewCursorReturnsOci8ExtCursor()
     {
-        $cursor = $this->getConnection()->getWrappedConnection()->newCursor();
+        /** @var \Doctrine\DBAL\Driver\OCI8Ext\OCI8Connection $conn */
+        $conn   = $this->getConnection()->getWrappedConnection();
+        $cursor = $conn->newCursor();
 
         $this->assertInstanceOf('Doctrine\DBAL\Driver\OCI8Ext\OCI8Cursor', $cursor);
     }

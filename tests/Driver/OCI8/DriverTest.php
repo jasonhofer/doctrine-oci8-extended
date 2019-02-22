@@ -9,6 +9,8 @@
  * file that was distributed with this source code.
  */
 
+/* @noinspection PhpUnhandledExceptionInspection */
+
 namespace Doctrine\DBAL\Test\Driver\OCI8Ext;
 
 use Doctrine\DBAL\Test\AbstractTestCase;
