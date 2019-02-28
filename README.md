@@ -3,8 +3,6 @@ Doctrine OCI8 Extended
 
 The Doctrine OCI8 driver with cursor support, for PHP 7.1+.
 
-**IMPORTANT: I have not tested this branch yet! Use at your own risk!**
-
 Usage
 -----
 ```php
