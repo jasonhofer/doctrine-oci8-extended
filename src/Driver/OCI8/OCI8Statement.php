@@ -12,6 +12,7 @@
 namespace Doctrine\DBAL\Driver\OCI8Ext;
 
 use Doctrine\DBAL\Driver\OCI8\OCI8Statement as BaseStatement;
+use Doctrine\DBAL\ParameterType;
 use LogicException;
 use PDO;
 use const OCI_B_BLOB;
@@ -73,15 +74,11 @@ class OCI8Statement extends BaseStatement
     private $returningCursors = false;
 
     /**
-     * @param string     $param
-     * @param mixed      $value
-     * @param int|string $type
-     *
-     * @return bool
+     * {@inheritdoc}
      *
      * @throws LogicException
      */
-    public function bindValue($param, $value, $type = null) : bool
+    public function bindValue($param, $value, $type = ParameterType::STRING) : bool
     {
         [$type, $ociType] = $this->normalizeType($type);
 
@@ -95,14 +92,9 @@ class OCI8Statement extends BaseStatement
     /** @noinspection MoreThanThreeArgumentsInspection */
     /** @noinspection PhpHierarchyChecksInspection */
     /**
-     * @param string     $column
-     * @param mixed      $variable
-     * @param int|string $type
-     * @param int|null   $length
-     *
-     * @return bool
+     * {@inheritdoc}
      */
-    public function bindParam($column, &$variable, $type = null, $length = null) : bool
+    public function bindParam($column, &$variable, $type = ParameterType::STRING, $length = null) : bool
     {
         $origCol = $column;
 
@@ -215,22 +207,11 @@ class OCI8Statement extends BaseStatement
     }
 
     /**
-     * Returns the next row of a result set.
-     *
-     * Cursors will be fetched, unless otherwise specified by the fetch mode.
-     *
-     * @param int|null $fetchMode Controls how the next row will be returned to the caller.
-     *                            The value must be one of the PDO::FETCH_* and/or OCI8::RETURN_* constants,
-     *                            defaulting to PDO::FETCH_BOTH.
-     *
-     * @return array|bool|mixed The return value of this method on success depends on the fetch mode.
-     *                          In all cases, FALSE is returned on failure.
-     *
-     * @see PDO::FETCH_* and OCI8::RETURN_* constants.
+     * {@inheritdoc}
      *
      * @throws \Doctrine\DBAL\Driver\OCI8\OCI8Exception
      */
-    public function fetch($fetchMode = null)
+    public function fetch($fetchMode = null, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
         [
             $fetchMode,
@@ -249,21 +230,11 @@ class OCI8Statement extends BaseStatement
     }
 
     /**
-     * Returns an array containing all of the result set rows.
-     *
-     * Cursors will be fetched, unless otherwise specified by the fetch mode.
-     *
-     * @param int|null $fetchMode Controls how the next row will be returned to the caller.
-     *                            The value must be one of the PDO::FETCH_* and/or OCI8::RETURN_* constants,
-     *                            defaulting to PDO::FETCH_BOTH.
-     *
-     * @return array|mixed
-     *
-     * @see PDO::FETCH_* and OCI8::RETURN_* constants.
+     * {@inheritdoc}
      *
      * @throws \Doctrine\DBAL\Driver\OCI8\OCI8Exception
      */
-    public function fetchAll($fetchMode = null)
+    public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
     {
         [
             $fetchMode,
@@ -301,21 +272,7 @@ class OCI8Statement extends BaseStatement
     }
 
     /**
-     * Returns a single column from the next row of a result set or FALSE if there are no more rows.
-     *
-     * Cursors will be fetched, unless otherwise specified by the fetch mode.
-     *
-     * @param int $columnIndex    0-indexed number of the column you wish to retrieve from the row.
-     *                            If no value is supplied, PDOStatement->fetchColumn()
-     *                            fetches the first column.
-     * @param int|null $fetchMode Controls how the next column value will be returned to the caller, if it is
-     *                            a cursor. The value must be one of the PDO::FETCH_* and/or OCI8::RETURN_* constants,
-     *                            defaulting to PDO::FETCH_BOTH.
-     *
-     * @return string|bool|array|resource|OCI8Cursor A single column in the next row of a result set, or FALSE if
-     *                                               there are no more rows.
-     *
-     * @see PDO::FETCH_* and OCI8::RETURN_* constants.
+     * {@inheritdoc}
      *
      * @throws \Doctrine\DBAL\Driver\OCI8\OCI8Exception
      */
@@ -402,8 +359,8 @@ class OCI8Statement extends BaseStatement
 
     /**
      * @param resource $resource
-     * @param int      $fetchMode
-     * @param bool     $returnCursor
+     * @param int $fetchMode
+     * @param bool $returnCursor
      *
      * @return array|mixed|OCI8Cursor
      *

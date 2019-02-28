@@ -2,7 +2,7 @@ version: '2'
 
 services:
     oracle_xe:
-        image: wnameless/oracle-xe-11g
+        image: christophesurmont/oracle-xe-11g
         environment:
             ORACLE_HOME: /u01/app/oracle/product/11.2.0/xe
             ORACLE_SID: xe

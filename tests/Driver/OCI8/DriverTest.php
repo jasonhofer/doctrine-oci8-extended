@@ -15,6 +15,7 @@ namespace Doctrine\DBAL\Test\Driver\OCI8Ext;
 
 use Doctrine\DBAL\Test\AbstractTestCase;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Driver\OCI8Ext\OCI8Connection;
 
 /**
  * Class DriverTest
@@ -25,17 +26,17 @@ use Doctrine\DBAL\Types\Type;
  */
 class DriverTest extends AbstractTestCase
 {
-    public function testDriverRegistersCursorType()
+    public function testDriverRegistersCursorType() : void
     {
         $this->getConnection();
 
         $this->assertTrue(Type::hasType('cursor'));
     }
 
-    public function testDriverManagerReturnsWrappedOci8ExtConnection()
+    public function testDriverManagerReturnsWrappedOci8ExtConnection() : void
     {
         $this->assertInstanceOf(
-            'Doctrine\DBAL\Driver\OCI8Ext\OCI8Connection',
+            OCI8Connection::class,
             $this->getConnection()->getWrappedConnection()
         );
     }

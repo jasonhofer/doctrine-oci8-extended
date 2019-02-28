@@ -15,6 +15,9 @@ namespace Doctrine\DBAL\Test\Driver\OCI8Ext;
 
 use Doctrine\DBAL\Driver\OCI8Ext\OCI8;
 use Doctrine\DBAL\Test\AbstractTestCase;
+use Doctrine\DBAL\Driver\OCI8Ext\OCI8Cursor;
+use PDO;
+use function sprintf;
 
 /**
  * Class OCI8StatementTest
@@ -25,14 +28,14 @@ use Doctrine\DBAL\Test\AbstractTestCase;
  */
 class OCI8StatementTest extends AbstractTestCase
 {
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
     }
 
     /**
      * @expectedException \LogicException
      */
-    public function testBindValueThrowsExceptionWhenTypeIsCursor()
+    public function testBindValueThrowsExceptionWhenTypeIsCursor() : void
     {
         $stmt   = $this->getConnection()->prepare('BEGIN MOCK_PROC(:cursor); END;');
         $cursor = null;
@@ -43,7 +46,7 @@ class OCI8StatementTest extends AbstractTestCase
     /**
      * @expectedException \LogicException
      */
-    public function testBindValueThrowsExceptionWhenTypeIsOciCursor()
+    public function testBindValueThrowsExceptionWhenTypeIsOciCursor() : void
     {
         $stmt   = $this->getConnection()->prepare('BEGIN MOCK_PROC(:cursor); END;');
         $cursor = null;
@@ -54,38 +57,38 @@ class OCI8StatementTest extends AbstractTestCase
     /**
      * @expectedException \LogicException
      */
-    public function testBindValueThrowsExceptionWhenTypeIsPdoStmt()
+    public function testBindValueThrowsExceptionWhenTypeIsPdoStmt() : void
     {
         $stmt   = $this->getConnection()->prepare('BEGIN MOCK_PROC(:cursor); END;');
         $cursor = null;
 
-        $stmt->bindValue('cursor', $cursor, \PDO::PARAM_STMT);
+        $stmt->bindValue('cursor', $cursor, PDO::PARAM_STMT);
     }
 
-    public function testBindParamSetsOci8Cursor()
+    public function testBindParamSetsOci8Cursor() : void
     {
         $stmt = $this->getConnection()->prepare('BEGIN MOCK_PROC(:cursor1, :cursor2, :cursor3); END;');
 
         $stmt->bindParam('cursor1', $cursor1, 'cursor');
         $stmt->bindParam('cursor2', $cursor2, OCI8::PARAM_CURSOR);
-        $stmt->bindParam('cursor3', $cursor3, \PDO::PARAM_STMT);
+        $stmt->bindParam('cursor3', $cursor3, PDO::PARAM_STMT);
 
-        $this->assertInstanceOf('Doctrine\DBAL\Driver\OCI8Ext\OCI8Cursor', $cursor1);
-        $this->assertInstanceOf('Doctrine\DBAL\Driver\OCI8Ext\OCI8Cursor', $cursor2);
-        $this->assertInstanceOf('Doctrine\DBAL\Driver\OCI8Ext\OCI8Cursor', $cursor3);
+        $this->assertInstanceOf(OCI8Cursor::class, $cursor1);
+        $this->assertInstanceOf(OCI8Cursor::class, $cursor2);
+        $this->assertInstanceOf(OCI8Cursor::class, $cursor3);
     }
 
-    public function testCursor()
+    public function testCursor() : void
     {
         $this->oci()->drop('procedure', 'FIRST_NAMES');
         $this->oci()->drop('table', 'employees');
 
-        $expected = array(
-            array('FIRST_NAME' => 'John'),
-            array('FIRST_NAME' => 'Jane'),
-            array('FIRST_NAME' => 'George'),
-            array('FIRST_NAME' => 'Albert'),
-        );
+        $expected = [
+            ['FIRST_NAME' => 'John'],
+            ['FIRST_NAME' => 'Jane'],
+            ['FIRST_NAME' => 'George'],
+            ['FIRST_NAME' => 'Albert'],
+        ];
 
         $this->oci()->execute('CREATE TABLE employees ( first_name VARCHAR(20) )');
 
@@ -108,7 +111,7 @@ class OCI8StatementTest extends AbstractTestCase
         $stmt->execute();
         $cursor->execute();
 
-        $results = $cursor->fetchAll(\PDO::FETCH_ASSOC);
+        $results = $cursor->fetchAll(PDO::FETCH_ASSOC);
 
         $this->assertSame($expected, $results);
 
@@ -116,7 +119,7 @@ class OCI8StatementTest extends AbstractTestCase
         $this->oci()->drop('table', 'employees');
     }
 
-    public function testBindArrayByName()
+    public function testBindArrayByName() : void
     {
         $this->oci()->drop('package', 'ARRAY_BIND_PKG_1');
         $this->oci()->drop('table', 'bind_example');
@@ -154,11 +157,11 @@ class OCI8StatementTest extends AbstractTestCase
 
         $conn  = $this->getConnection();
         $stmt  = $conn->prepare('BEGIN ARRAY_BIND_PKG_1.IO_BIND(:c1); END;');
-        $array = array('one', 'two', 'three', 'four', 'five');
+        $array = ['one', 'two', 'three', 'four', 'five'];
         $stmt->bindParam('c1', $array);
         $stmt->execute();
 
-        $this->assertSame(array('five', 'four', 'three', 'two', 'one'), $array);
+        $this->assertSame(['five', 'four', 'three', 'two', 'one'], $array);
 
         $this->oci()->drop('package', 'ARRAY_BIND_PKG_1');
         $this->oci()->drop('table', 'bind_example');

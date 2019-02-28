@@ -14,6 +14,7 @@
 namespace Doctrine\DBAL\Test\Driver\OCI8Ext;
 
 use Doctrine\DBAL\Test\AbstractTestCase;
+use Doctrine\DBAL\Driver\OCI8Ext\OCI8Statement;
 
 /**
  * Class OCI8ConnectionTest
@@ -24,21 +25,12 @@ use Doctrine\DBAL\Test\AbstractTestCase;
  */
 class OCI8ConnectionTest extends AbstractTestCase
 {
-    public function testPrepareReturnsWrappedOci8ExtStatement()
+    public function testPrepareReturnsWrappedOci8ExtStatement() : void
     {
         $stmt = $this->getConnection()->prepare('SELECT * FROM SYS.DUAL');
 
         $driverStmt = $this->getPropertyValue($stmt, 'stmt');
 
-        $this->assertInstanceOf('Doctrine\DBAL\Driver\OCI8Ext\OCI8Statement', $driverStmt);
-    }
-
-    public function testNewCursorReturnsOci8ExtCursor()
-    {
-        /** @var \Doctrine\DBAL\Driver\OCI8Ext\OCI8Connection $conn */
-        $conn   = $this->getConnection()->getWrappedConnection();
-        $cursor = $conn->newCursor();
-
-        $this->assertInstanceOf('Doctrine\DBAL\Driver\OCI8Ext\OCI8Cursor', $cursor);
+        $this->assertInstanceOf(OCI8Statement::class, $driverStmt);
     }
 }

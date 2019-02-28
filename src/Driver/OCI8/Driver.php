@@ -51,7 +51,7 @@ class Driver extends BaseDriver
      *
      * @throws Exception
      */
-    public function connect(array $params, $username = null, $password = null, array $driverOptions = array()) : OCI8Connection
+    public function connect(array $params, $username = null, $password = null, array $driverOptions = []) : OCI8Connection
     {
         try {
             return new OCI8Connection(

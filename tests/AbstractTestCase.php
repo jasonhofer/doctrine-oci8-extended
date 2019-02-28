@@ -12,6 +12,22 @@
 namespace Doctrine\DBAL\Test;
 
 use Doctrine\DBAL;
+use PHPUnit_Framework_TestCase;
+use Doctrine\DBAL\Driver\OCI8Ext\Driver;
+use ReflectionObject;
+use RuntimeException;
+use function getenv;
+use function implode;
+use function oci_close;
+use function oci_connect;
+use function oci_error;
+use function oci_execute;
+use function oci_parse;
+use function sprintf;
+use function strpos;
+use function strrpos;
+use function strtoupper;
+use function substr;
 
 /**
  * Class AbstractTestCase
@@ -20,7 +36,7 @@ use Doctrine\DBAL;
  * @author  Jason Hofer <jason.hofer@gmail.com>
  * 2018-02-23 4:26 PM
  */
-abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
+abstract class AbstractTestCase extends PHPUnit_Framework_TestCase
 {
     /**
      * @var DBAL\Connection
@@ -37,20 +53,20 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
      *
      * @throws DBAL\DBALException
      */
-    protected function getConnection()
+    protected function getConnection() : DBAL\Connection
     {
         if ($this->connection) {
             return $this->connection;
         }
 
-        $params = array(
+        $params = [
             'user'        => getenv('DB_USER'),
             'password'    => getenv('DB_PASSWORD'),
             'host'        => getenv('DB_HOST'),
             'port'        => getenv('DB_PORT'),
             'dbname'      => getenv('DB_SCHEMA'),
-            'driverClass' => 'Doctrine\DBAL\Driver\OCI8Ext\Driver',
-        );
+            'driverClass' => Driver::class,
+        ];
 
         $config = new DBAL\Configuration();
 
@@ -59,16 +75,16 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 
     protected function getPropertyValue($obj, $prop)
     {
-        $rObj  = new \ReflectionObject($obj);
+        $rObj  = new ReflectionObject($obj);
         $rProp = $rObj->getProperty($prop);
         $rProp->setAccessible(true);
 
         return $rProp->getValue($obj);
     }
 
-    protected function invokeMethod($obj, $method, array $args = array())
+    protected function invokeMethod($obj, $method, array $args = [])
     {
-        $rObj    = new \ReflectionObject($obj);
+        $rObj    = new ReflectionObject($obj);
         $rMethod = $rObj->getMethod($method);
         $rMethod->setAccessible(true);
 
@@ -78,7 +94,7 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
     /**
      * @return OciWrapper
      */
-    protected function oci()
+    protected function oci() : OciWrapper
     {
         return $this->oci ?: ($this->oci = new OciWrapper());
     }
@@ -102,7 +118,7 @@ class OciWrapper
             if (!$this->dbh) {
                 /** @var array $m */
                 $m = oci_error();
-                throw new \RuntimeException($m['message']);
+                throw new RuntimeException($m['message']);
             }
         }
 
@@ -136,16 +152,16 @@ class OciWrapper
      *
      * @return bool
      */
-    public function drop($type, $name)
+    public function drop($type, $name) : bool
     {
-        static $codes = array(
+        static $codes = [
             'COLUMN'     => '-904',
             'TABLE'      => '-942',
             'CONSTRAINT' => '-2443',
             'FUNCTION'   => '-4043',
             'PACKAGE'    => '-4043',
             'PROCEDURE'  => '-4043',
-        );
+        ];
         $type = strtoupper($type);
         $code = $codes[$type];
         if (false !== strpos('COLUMN CONSTRAINT', $type)) {
@@ -170,7 +186,7 @@ class OciWrapper
         return (bool) $this->execute($sql);
     }
 
-    public function close()
+    public function close() : bool
     {
         $result    = oci_close($this->dbh);
         $this->dbh = null;
