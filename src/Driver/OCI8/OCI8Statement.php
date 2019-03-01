@@ -54,10 +54,9 @@ class OCI8Statement extends BaseStatement
 
     /** @var array */
     protected $cursorFields = [];
+
     /** @var bool */
     protected $checkedForCursorFields = false;
-    /** @var bool */
-    protected $hasCursorFields = false;
 
     /**
      * Used because parent::fetchAll() calls $this->fetch().
@@ -97,10 +96,6 @@ class OCI8Statement extends BaseStatement
     public function bindParam($column, &$variable, $type = ParameterType::STRING, $length = null) : bool
     {
         $origCol = $column;
-
-        if (func_num_args() <= 2) {
-            $type = PDO::PARAM_STR;
-        }
 
         /** @noinspection CallableParameterUseCaseInTypeContextInspection */
         $column = $this->_paramMap[$column] ?? $column;
@@ -218,9 +213,9 @@ class OCI8Statement extends BaseStatement
             $returnResources,
             $returnCursors
         ] = $this->processFetchMode($fetchMode, true);
-        // "Globals" are checked because parent::fetchAll() uses $this->fetch().
+        // "Globals" are checked because parent::fetchAll() calls $this->fetch().
 
-        $row = parent::fetch($fetchMode);
+        $row = parent::fetch($fetchMode, $cursorOrientation, $cursorOffset);
 
         if (!$returnResources) {
             $this->fetchCursorFields($row, $fetchMode, $returnCursors);
@@ -241,9 +236,9 @@ class OCI8Statement extends BaseStatement
             $this->returningResources,
             $this->returningCursors
         ] = $this->processFetchMode($fetchMode);
-        // "Globals" are set because parent::fetchAll() uses $this->fetch().
+        // "Globals" are set because parent::fetchAll() calls $this->fetch().
 
-        $results = parent::fetchAll($fetchMode);
+        $results = parent::fetchAll($fetchMode, $fetchArgument, $ctorArgs);
 
         if (
             !$this->returningResources &&
@@ -257,9 +252,8 @@ class OCI8Statement extends BaseStatement
                 }
                 unset($row);
             } elseif (is_resource(reset($results))) {
-                $self    = $this;
-                $results = array_map(function ($value) use ($self, $fetchMode) {
-                    return $self->fetchCursorValue($value, $fetchMode, $self->returningCursors);
+                $results = array_map(function ($value) use ($fetchMode) {
+                    return $this->fetchCursorValue($value, $fetchMode, $this->returningCursors);
                 }, $results);
             }
         }
@@ -308,7 +302,7 @@ class OCI8Statement extends BaseStatement
         } elseif (!$this->checkedForCursorFields) {
             // This will also call fetchCursorField() on each cursor field of the first row.
             $this->findCursorFields($row, $fetchMode, $returnCursors);
-        } elseif ($this->hasCursorFields) {
+        } elseif ($this->cursorFields) {
             $shared = [];
             foreach ($this->cursorFields as $field) {
                 $key = (string) $row[$field];
@@ -325,8 +319,7 @@ class OCI8Statement extends BaseStatement
     protected function resetCursorFields() : void
     {
         $this->cursorFields           = [];
-        $this->checkedForCursorFields =
-        $this->hasCursorFields        = false;
+        $this->checkedForCursorFields = false;
     }
 
     /**
@@ -343,8 +336,7 @@ class OCI8Statement extends BaseStatement
             if (!is_resource($value)) {
                 continue;
             }
-            $this->hasCursorFields = true;
-            $this->cursorFields[]  = $field;
+            $this->cursorFields[] = $field;
             $key = (string) $value;
             if (isset($shared[$key])) {
                 $row[$field] = $shared[$key];
