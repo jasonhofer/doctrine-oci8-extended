@@ -3,8 +3,6 @@ Doctrine OCI8 Extended
 
 The Doctrine OCI8 driver with cursor support, for PHP 7.1+.
 
-**IMPORTANT: I have not tested this branch yet! Use at your own risk!**
-
 Usage
 -----
 ```php
@@ -64,3 +62,5 @@ use Doctrine\DBAL\Driver\OCI8Ext\OCI8;
 $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC+OCI8::RETURN_CURSORS);
 $rows = $stmt->fetchAll(\PDO::FETCH_BOTH+OCI8::RETURN_RESOURCES);
 ```
+
+*Special thanks to Michal Tichý for his patch.*
